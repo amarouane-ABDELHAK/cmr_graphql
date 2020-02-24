@@ -27,9 +27,6 @@ async function searchCmrGranules(parent, args, context, info, page_size) {
   // Default page size to 4
   page_size = page_size ? page_size:4
   const collectionId = parent.id;
-  console.log(page_size);
-  console.log(parent)
-  //console.log(info)
   const response = await got(`${cmrEndpoint}/granules.json?page_size=${page_size}&collection_concept_id=${collectionId}`);
   return JSON.parse(response.body).feed.entry;
 }
