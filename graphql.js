@@ -1,5 +1,5 @@
 const {makeExecutableSchema} = require('graphql-tools');
-const {searchCmrCollections, searchCmrGranules, mysearchCmrGranules, searchCmrVariables, searchCmrServices, getBrowseLink, getDownloadLink} = require('./cmr.js');
+const {searchCmrCollections, searchCmrUMMVars, searchCmrGranules, mysearchCmrGranules, searchCmrVariables, searchCmrServices, getBrowseLink, getDownloadLink} = require('./cmr.js');
 
 // Construct a schema, using GraphQL schema language
 // TODO - figure out associations, orbit_parameters, links (would be good to add top level browseLink and downloadLink fields)
@@ -67,18 +67,21 @@ const typeDefs = `
     granules: [Granule]
     variables: [Variable]
     services: [Service]
+    granule_count: Int
   }
 
   type Query {
     collections(concept_id: String, short_name: String, page_size: Int): [Collection],
-    granules(concept_id: String, short_name: String, page_size: Int, offset: Int): [Granule]
+    granules(concept_id: String, short_name: String, page_size: Int, offset: Int): [Granule],
+    variables(concept_id: String, name: String): [Variable]
   }
 `;
 
 const resolvers = {
   Query: {
     collections: (parent, { concept_id, short_name, page_size }, context, info) => searchCmrCollections(concept_id, short_name, page_size),
-    granules: (parent, { concept_id, short_name, page_size, offset }, context, info) => mysearchCmrGranules(concept_id, short_name, page_size, offset)
+    granules: (parent, { concept_id, short_name, page_size, offset }, context, info) => mysearchCmrGranules(concept_id, short_name, page_size, offset),
+    variables: (parent, {concept_id, name}, context, info) => searchCmrUMMVars(concept_id, name)
   },
   Collection: {
     granules: (parent, args, context, info, page_size) => searchCmrGranules(parent, args, context, info, page_size),

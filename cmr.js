@@ -1,7 +1,7 @@
 const got = require('got');
 
 const cmrEndpoint = "https://cmr.earthdata.nasa.gov/search";
-
+const trim = (str, chars) => str.split(chars).filter(Boolean).join(chars);
 async function searchCmrCollections(concept_id, short_name, page_size) {
   
   const conceptIdQuery = concept_id ? "concept_id=" + concept_id : "";
@@ -19,7 +19,7 @@ async function searchCmrCollections(concept_id, short_name, page_size) {
   page_size = page_size ? page_size:1
 
 
-  const response = await got(cmrEndpoint + `/collections.json?page_size=${page_size}&${query}`);
+  const response = await got(cmrEndpoint + `/collections.json?page_size=${page_size}&${query}&include_granule_counts=true`);
   return JSON.parse(response.body).feed.entry;
 }
 
@@ -54,6 +54,16 @@ async function mysearchCmrGranules(concept_id, short_name, page_size, offset) {
 
 
 
+}
+
+async function searchCmrUMMVars(concept_id, name) {
+  const conceptIdQuery = concept_id ? `concept_id=${concept_id}` : "";
+  const nameQuery = name ? `name=${name}` : "";
+  const query = trim(`${conceptIdQuery}&${nameQuery}`, '&')
+  const response = await got(`${cmrEndpoint}/variables.json?page_size=4&${query}`);
+  return JSON.parse(response.body).items;
+  
+  
 }
 
 async function searchCmrVariables(collection) {
@@ -106,4 +116,4 @@ function getDownloadLink(concept) {
   return null;
 }
 
-module.exports = {searchCmrCollections, searchCmrGranules, mysearchCmrGranules, searchCmrVariables, searchCmrServices, getBrowseLink, getDownloadLink};
+module.exports = {searchCmrCollections, searchCmrUMMVars, searchCmrGranules, mysearchCmrGranules, searchCmrVariables, searchCmrServices, getBrowseLink, getDownloadLink};
